@@ -75,10 +75,10 @@ document.addEventListener("DOMContentLoaded", function () {
         });
   */
 
- Blockly.Blocks['when_initial_peers_started'] = {
+ Blockly.Blocks['on_start'] = {
     init: function() {
       this.appendDummyInput()
-          .appendField(new Blockly.FieldLabelSerializable("When initial peers started"), "NAME");
+          .appendField(new Blockly.FieldLabelSerializable("On start"), "NAME");
       this.setNextStatement(true, null);
       this.setColour(45);
    this.setTooltip("");
@@ -183,18 +183,38 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   };
 
-  Blockly.JavaScript['when_initial_peers_started'] = function(block) {
-      // TODO: Assemble JavaScript into code variable.
-      var code = '// When initial peers started\n\n' +
-        'console.log("started")\n\n'
-      return code;
+  Blockly.JavaScript['on_start'] = function(block) {
+    function run () {
+      if (!handlers.start) handlers.start = []
+      {
+        const func = async function () {
+          console.log("start")
+        }
+        handlers.start.push(func)
+      }
+      context.lastHandler = handlers.start
+    }
+    var code = '// On start\n\n' +
+      ';(' + run.toString().replace('run (', '(') + ')()\n\n'
+    return code;
   };
 
   Blockly.JavaScript['generate_random_file'] = function(block) {
       var value_name = Blockly.JavaScript.valueToCode(block, 'NAME', Blockly.JavaScript.ORDER_ATOMIC);
-      // TODO: Assemble JavaScript into code variable.
+      function run (value_name) {
+        const lastFunc = context.lastHandler[context.lastHandler.length - 1]
+        context.lastHandler[context.lastHandler.length - 1] =
+          async function () {
+            await lastFunc()
+            console.log('Generate random file: ', value_name)
+            return {
+              file: 'file_' + value_name.replace(/ /g, '_') + '.bin'
+            }
+          }
+      }
       var code = `// Generate random file: ${value_name}\n\n` +
-        `context.file = '${value_name}'\n\n`
+        ';(' + run.toString().replace('run (', '(') + ')' +
+        `('${value_name}')\n\n`
       return code;
   };
 
@@ -207,9 +227,20 @@ document.addEventListener("DOMContentLoaded", function () {
   };
 
   Blockly.JavaScript['ipfs_add'] = function(block) {
-      // TODO: Assemble JavaScript into code variable.
-      var code = '// ipfs add <cid>\n\n' +
-        'context.cid = "abcd"\n\n'
+      function run (value_name) {
+        const lastFunc = context.lastHandler[context.lastHandler.length - 1]
+        context.lastHandler[context.lastHandler.length - 1] =
+          async function () {
+            const { file } = await lastFunc()
+            console.log('ipfs add', file)
+            return {
+              cid: '12345'
+            }
+          }
+      }
+      var code = `// ipfs add\n\n` +
+        ';(' + run.toString().replace('run (', '(') + ')' +
+        `()\n\n`
       return code;
   };
 
@@ -254,15 +285,20 @@ document.addEventListener("DOMContentLoaded", function () {
     const codeEle = document.getElementById('code')
     codeEle.textContent = code
 
-    try {
-      async function run () {
-        code = 'let context = {}\n\n' + code + '\n\n' +
-          'console.log("context", context)'
+    async function run () {
+      try {
+        code = 'let context = {}\n' +
+          'let handlers = {}\n\n' +
+          code + '\n\n' +
+          'console.log("before context", context)\n\n' +
+          'handlers.start[0]().then(() => {\n' +
+          '  console.log("after context", context)\n\n' +
+          '})\n'
         eval(code)
+      } catch (e) {
+        console.error(e)
       }
-      run()
-    } catch (e) {
-      console.error(e)
     }
+    run()
   })
 });

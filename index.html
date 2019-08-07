@@ -34,35 +34,35 @@
 
     <xml xmlns="https://developers.google.com/blockly/xml" id="toolbox" style="display: none">
         <category name="Blocks">
-            <block type="when_initial_peers_started">
-            <field name="NAME">When initial peers started</field>
+            <block type="on_start">
+                <field name="NAME">On start</field>
             </block>
             <block type="generate_random_file">
-            <field name="GEN RANDOM FILE">Generate random file</field>
-            <value name="NAME">
-                <block type="size_mb">
-                <field name="SIZE">1</field>
-                </block>
-            </value>
-            <next>
-                <block type="ipfs_add">
+                <field name="GEN RANDOM FILE">Generate random file</field>
+                <value name="NAME">
+                    <block type="size_mb">
+                        <field name="SIZE">1</field>
+                    </block>
+                </value>
                 <next>
-                    <block type="write_cid_to_backchannel">
-                    <field name="NAME">name</field>
+                    <block type="ipfs_add">
+                        <next>
+                            <block type="write_cid_to_backchannel">
+                                <field name="NAME">name</field>
+                            </block>
+                        </next>
                     </block>
                 </next>
-                </block>
-            </next>
             </block>
             <block type="read_cid_from_backchannel">
-            <field name="NAME">name</field>
-            <next>
-                <block type="ipfs_get">
+                <field name="NAME">name</field>
                 <next>
-                    <block type="wait_for_completion"/>
+                    <block type="ipfs_get">
+                        <next>
+                            <block type="wait_for_completion"/>
+                        </next>
+                    </block>
                 </next>
-                </block>
-            </next>
             </block>
         </category>
     </xml>

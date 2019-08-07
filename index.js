@@ -183,58 +183,58 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   };
 
-Blockly.JavaScript['when_initial_peers_started'] = function(block) {
-    // TODO: Assemble JavaScript into code variable.
-    var code = '// When initial peers started\n\n'
-    return code;
-};
+  Blockly.JavaScript['when_initial_peers_started'] = function(block) {
+      // TODO: Assemble JavaScript into code variable.
+      var code = '// When initial peers started\n\n'
+      return code;
+  };
 
-Blockly.JavaScript['generate_random_file'] = function(block) {
-    var value_name = Blockly.JavaScript.valueToCode(block, 'NAME', Blockly.JavaScript.ORDER_ATOMIC);
-    // TODO: Assemble JavaScript into code variable.
-    var code = `// Generate random file: ${value_name}\n\n`
-    return code;
-};
+  Blockly.JavaScript['generate_random_file'] = function(block) {
+      var value_name = Blockly.JavaScript.valueToCode(block, 'NAME', Blockly.JavaScript.ORDER_ATOMIC);
+      // TODO: Assemble JavaScript into code variable.
+      var code = `// Generate random file: ${value_name}\n\n`
+      return code;
+  };
 
-Blockly.JavaScript['size_mb'] = function(block) {
-    var number_size = block.getFieldValue('SIZE');
-    // TODO: Assemble JavaScript into code variable.
-    var code = `${number_size} MB`;
-    // TODO: Change ORDER_NONE to the correct strength.
-    return [code, Blockly.JavaScript.ORDER_NONE];
-};
+  Blockly.JavaScript['size_mb'] = function(block) {
+      var number_size = block.getFieldValue('SIZE');
+      // TODO: Assemble JavaScript into code variable.
+      var code = `${number_size} MB`;
+      // TODO: Change ORDER_NONE to the correct strength.
+      return [code, Blockly.JavaScript.ORDER_NONE];
+  };
 
-Blockly.JavaScript['ipfs_add'] = function(block) {
-    // TODO: Assemble JavaScript into code variable.
-    var code = '// ipfs add <cid>\n\n'
-    return code;
-};
+  Blockly.JavaScript['ipfs_add'] = function(block) {
+      // TODO: Assemble JavaScript into code variable.
+      var code = '// ipfs add <cid>\n\n'
+      return code;
+  };
 
-Blockly.JavaScript['write_cid_to_backchannel'] = function(block) {
-    var text_name = block.getFieldValue('NAME');
-    // TODO: Assemble JavaScript into code variable.
-    var code = `// write <cid> to backchannel ${text_name}\n\n`
-    return code;
-};
+  Blockly.JavaScript['write_cid_to_backchannel'] = function(block) {
+      var text_name = block.getFieldValue('NAME');
+      // TODO: Assemble JavaScript into code variable.
+      var code = `// write <cid> to backchannel ${text_name}\n\n`
+      return code;
+  };
 
-Blockly.JavaScript['read_cid_from_backchannel'] = function(block) {
-    var text_name = block.getFieldValue('NAME');
-    // TODO: Assemble JavaScript into code variable.
-    var code = `// read <cid> from backchannel ${text_name}\n\n`
-    return code;
-};
+  Blockly.JavaScript['read_cid_from_backchannel'] = function(block) {
+      var text_name = block.getFieldValue('NAME');
+      // TODO: Assemble JavaScript into code variable.
+      var code = `// read <cid> from backchannel ${text_name}\n\n`
+      return code;
+  };
 
-Blockly.JavaScript['ipfs_get'] = function(block) {
-    // TODO: Assemble JavaScript into code variable.
-    var code = `// ipfs get <cid>\n\n`
-    return code;
-};
+  Blockly.JavaScript['ipfs_get'] = function(block) {
+      // TODO: Assemble JavaScript into code variable.
+      var code = `// ipfs get <cid>\n\n`
+      return code;
+  };
 
-Blockly.JavaScript['wait_for_completion'] = function(block) {
-    // TODO: Assemble JavaScript into code variable.
-    var code = `// wait for completion\n\n`
-    return code;
-};
+  Blockly.JavaScript['wait_for_completion'] = function(block) {
+      // TODO: Assemble JavaScript into code variable.
+      var code = `// wait for completion\n\n`
+      return code;
+  };
 
   generateBtn = document.getElementById('generateBtn')
   generateBtn.addEventListener('click', () => {
@@ -242,5 +242,7 @@ Blockly.JavaScript['wait_for_completion'] = function(block) {
     Blockly.JavaScript.addReservedWords('code');
     var code = Blockly.JavaScript.workspaceToCode(workspace);
     console.log('Jim code', code)
+    const codeEle = document.getElementById('code')
+    codeEle.textContent = code
   })
 });

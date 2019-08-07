@@ -185,14 +185,16 @@ document.addEventListener("DOMContentLoaded", function () {
 
   Blockly.JavaScript['when_initial_peers_started'] = function(block) {
       // TODO: Assemble JavaScript into code variable.
-      var code = '// When initial peers started\n\n'
+      var code = '// When initial peers started\n\n' +
+        'console.log("started")\n\n'
       return code;
   };
 
   Blockly.JavaScript['generate_random_file'] = function(block) {
       var value_name = Blockly.JavaScript.valueToCode(block, 'NAME', Blockly.JavaScript.ORDER_ATOMIC);
       // TODO: Assemble JavaScript into code variable.
-      var code = `// Generate random file: ${value_name}\n\n`
+      var code = `// Generate random file: ${value_name}\n\n` +
+        `context.file = '${value_name}'\n\n`
       return code;
   };
 
@@ -206,7 +208,8 @@ document.addEventListener("DOMContentLoaded", function () {
 
   Blockly.JavaScript['ipfs_add'] = function(block) {
       // TODO: Assemble JavaScript into code variable.
-      var code = '// ipfs add <cid>\n\n'
+      var code = '// ipfs add <cid>\n\n' +
+        'context.cid = "abcd"\n\n'
       return code;
   };
 
@@ -238,11 +241,28 @@ document.addEventListener("DOMContentLoaded", function () {
 
   generateBtn = document.getElementById('generateBtn')
   generateBtn.addEventListener('click', () => {
-    console.log('Click')
     Blockly.JavaScript.addReservedWords('code');
     var code = Blockly.JavaScript.workspaceToCode(workspace);
-    console.log('Jim code', code)
     const codeEle = document.getElementById('code')
     codeEle.textContent = code
+  })
+
+  startBtn = document.getElementById('startBtn')
+  startBtn.addEventListener('click', () => {
+    Blockly.JavaScript.addReservedWords('code');
+    var code = Blockly.JavaScript.workspaceToCode(workspace);
+    const codeEle = document.getElementById('code')
+    codeEle.textContent = code
+
+    try {
+      async function run () {
+        code = 'let context = {}\n\n' + code + '\n\n' +
+          'console.log("context", context)'
+        eval(code)
+      }
+      run()
+    } catch (e) {
+      console.error(e)
+    }
   })
 });

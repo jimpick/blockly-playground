@@ -20,10 +20,10 @@
         <div>
             <h1>Demo</h1>
 
-            <button id="generateBtn">Generate</button>
+            <!-- <button id="generateBtn">Generate</button> -->
             <button id="startBtn">Start</button>
 
-            <pre id="code"></pre>
+            <!-- <pre id="code"></pre> -->
         </div>
     </div>
     <div id="blocklyDiv" style="position: absolute"></div>
@@ -37,25 +37,26 @@
             <block type="on_start">
                 <field name="NAME">On start</field>
             </block>
-            <block type="generate_random_file">
-                <field name="GEN RANDOM FILE">Generate random file</field>
+            <block type="generate_random_blob">
+                <field name="GEN RANDOM BLOB">Generate random blob</field>
                 <value name="NAME">
-                    <block type="size_mb">
-                        <field name="SIZE">1</field>
+                    <block type="sizer">
+                        <field name="SIZE">10</field>
+                        <field name="METRIC">KB</field>
                     </block>
                 </value>
                 <next>
                     <block type="ipfs_add">
                         <next>
-                            <block type="write_cid_to_backchannel">
-                                <field name="NAME">name</field>
+                            <block type="write_cid_to_pubsub_topic">
+                                <field name="NAME">blockly_demo</field>
                             </block>
                         </next>
                     </block>
                 </next>
             </block>
-            <block type="read_cid_from_backchannel">
-                <field name="NAME">name</field>
+            <block type="read_cid_from_pubsub_topic">
+                <field name="NAME">blockly_demo</field>
                 <next>
                     <block type="ipfs_get">
                         <next>

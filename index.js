@@ -86,11 +86,11 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   };
   
-  Blockly.Blocks['generate_random_file'] = {
+  Blockly.Blocks['generate_random_blob'] = {
     init: function() {
       this.appendValueInput("NAME")
           .setCheck("size")
-          .appendField(new Blockly.FieldLabelSerializable("Generate random file"), "GEN RANDOM FILE");
+          .appendField(new Blockly.FieldLabelSerializable("Generate random blob"), "GEN RANDOM BLOB");
       this.setPreviousStatement(true, null);
       this.setNextStatement(true, null);
       this.setColour(230);
@@ -99,34 +99,34 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   };
   
-  Blockly.Blocks['size_mb'] = {
+  Blockly.Blocks['sizer'] = {
     init: function() {
       this.appendDummyInput()
-          .appendField(new Blockly.FieldNumber(1, 0), "SIZE")
-          .appendField("MB");
+        .appendField(new Blockly.FieldNumber(1, 0), "SIZE")
+        .appendField(new Blockly.FieldDropdown([["bytes","BYTES"], ["kB","KB"], ["kiB","KIB"], ["MB","MB"], ["MiB","MIB"], ["GB","GB"], ["GiB","GIB"]]), "METRIC");
       this.setOutput(true, "size");
       this.setColour(0);
-   this.setTooltip("");
-   this.setHelpUrl("");
+      this.setTooltip("");
+      this.setHelpUrl("");
     }
   };
-  
+
   Blockly.Blocks['ipfs_add'] = {
     init: function() {
       this.appendDummyInput()
-          .appendField("ipfs add");
+        .appendField("ipfs add");
       this.setPreviousStatement(true, null);
       this.setNextStatement(true, null);
       this.setColour(230);
-   this.setTooltip("");
-   this.setHelpUrl("");
+      this.setTooltip("");
+      this.setHelpUrl("");
     }
   };
   
-  Blockly.Blocks['write_to_backchannel'] = {
+  Blockly.Blocks['write_cid_to_pubsub_topic'] = {
     init: function() {
       this.appendDummyInput()
-          .appendField("Write to backchannel")
+          .appendField("Write CID to pubsub topic")
           .appendField(new Blockly.FieldTextInput("name"), "NAME");
       this.setPreviousStatement(true, null);
       this.setColour(230);
@@ -135,22 +135,10 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   };
   
-  Blockly.Blocks['write_cid_to_backchannel'] = {
+  Blockly.Blocks['read_cid_from_pubsub_topic'] = {
     init: function() {
       this.appendDummyInput()
-          .appendField("Write cid to backchannel")
-          .appendField(new Blockly.FieldTextInput("name"), "NAME");
-      this.setPreviousStatement(true, null);
-      this.setColour(230);
-   this.setTooltip("");
-   this.setHelpUrl("");
-    }
-  };
-  
-  Blockly.Blocks['read_cid_from_backchannel'] = {
-    init: function() {
-      this.appendDummyInput()
-          .appendField("Read CID from backchannel")
+          .appendField("Read CID from pubsub topic")
           .appendField(new Blockly.FieldTextInput("name"), "NAME");
       this.setNextStatement(true, null);
       this.setColour(45);
@@ -199,31 +187,32 @@ document.addEventListener("DOMContentLoaded", function () {
     return code;
   };
 
-  Blockly.JavaScript['generate_random_file'] = function(block) {
-      var value_name = Blockly.JavaScript.valueToCode(block, 'NAME', Blockly.JavaScript.ORDER_ATOMIC);
+  Blockly.JavaScript['generate_random_blob'] = function(block) {
+      var value_name = Blockly.JavaScript.valueToCode(
+        block, 'NAME', Blockly.JavaScript.ORDER_ATOMIC
+      ).replace('(', '').replace(')', '')
       function run (value_name) {
         const lastFunc = context.lastHandler[context.lastHandler.length - 1]
         context.lastHandler[context.lastHandler.length - 1] =
           async function () {
             await lastFunc()
-            console.log('Generate random file: ', value_name)
+            console.log('Generate random blob:', value_name)
             return {
-              file: 'file_' + value_name.replace(/ /g, '_') + '.bin'
+              file: 'blob_' + value_name.replace(/ /g, '_') + '.bin'
             }
           }
       }
-      var code = `// Generate random file: ${value_name}\n\n` +
+      var code = `// Generate random blob: ${value_name}\n\n` +
         ';(' + run.toString().replace('run (', '(') + ')' +
         `('${value_name}')\n\n`
       return code;
   };
 
-  Blockly.JavaScript['size_mb'] = function(block) {
-      var number_size = block.getFieldValue('SIZE');
-      // TODO: Assemble JavaScript into code variable.
-      var code = `${number_size} MB`;
-      // TODO: Change ORDER_NONE to the correct strength.
-      return [code, Blockly.JavaScript.ORDER_NONE];
+  Blockly.JavaScript['sizer'] = function(block) {
+    var number_size = block.getFieldValue('SIZE');
+    var dropdown_metric = block.getFieldValue('METRIC');
+    var code = `${number_size} ${dropdown_metric}`;
+    return [code, Blockly.JavaScript.ORDER_NONE];
   };
 
   Blockly.JavaScript['ipfs_add'] = function(block) {
@@ -244,17 +233,17 @@ document.addEventListener("DOMContentLoaded", function () {
       return code;
   };
 
-  Blockly.JavaScript['write_cid_to_backchannel'] = function(block) {
+  Blockly.JavaScript['write_cid_to_pubsub_topic'] = function(block) {
       var text_name = block.getFieldValue('NAME');
       // TODO: Assemble JavaScript into code variable.
-      var code = `// write <cid> to backchannel ${text_name}\n\n`
+      var code = `// write <cid> to pubsub topic ${text_name}\n\n`
       return code;
   };
 
-  Blockly.JavaScript['read_cid_from_backchannel'] = function(block) {
+  Blockly.JavaScript['read_cid_from_pubsub_topic'] = function(block) {
       var text_name = block.getFieldValue('NAME');
       // TODO: Assemble JavaScript into code variable.
-      var code = `// read <cid> from backchannel ${text_name}\n\n`
+      var code = `// read <cid> from pubsub topic ${text_name}\n\n`
       return code;
   };
 
@@ -270,6 +259,7 @@ document.addEventListener("DOMContentLoaded", function () {
       return code;
   };
 
+  /*
   generateBtn = document.getElementById('generateBtn')
   generateBtn.addEventListener('click', () => {
     Blockly.JavaScript.addReservedWords('code');
@@ -277,13 +267,14 @@ document.addEventListener("DOMContentLoaded", function () {
     const codeEle = document.getElementById('code')
     codeEle.textContent = code
   })
+  */
 
   startBtn = document.getElementById('startBtn')
   startBtn.addEventListener('click', () => {
     Blockly.JavaScript.addReservedWords('code');
     var code = Blockly.JavaScript.workspaceToCode(workspace);
-    const codeEle = document.getElementById('code')
-    codeEle.textContent = code
+    // const codeEle = document.getElementById('code')
+    // codeEle.textContent = code
 
     async function run () {
       try {

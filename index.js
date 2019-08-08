@@ -291,9 +291,11 @@ document.addEventListener("DOMContentLoaded", function () {
           'let handlers = {}\n\n' +
           code + '\n\n' +
           'console.log("before context", context)\n\n' +
-          'handlers.start[0]().then(() => {\n' +
-          '  console.log("after context", context)\n\n' +
-          '})\n'
+          'for (const handler of handlers.start) {\n' +
+          '  handler().then(() => {\n' +
+          '    console.log("after context", context)\n' +
+          '  })\n' +
+          '}\n'
         eval(code)
       } catch (e) {
         console.error(e)

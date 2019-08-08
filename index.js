@@ -23,59 +23,7 @@
 
 document.addEventListener("DOMContentLoaded", function () {
 
-  var blocklyArea = document.getElementById('blocklyArea');
-  var blocklyDiv = document.getElementById('blocklyDiv');
-  var workspace = Blockly.inject(blocklyDiv,
-      {toolbox: document.getElementById('toolbox')});
-  var onresize = function(e) {
-    // Compute the absolute coordinates and dimensions of blocklyArea.
-    var element = blocklyArea;
-    var x = 0;
-    var y = 0;
-    do {
-      x += element.offsetLeft;
-      y += element.offsetTop;
-      element = element.offsetParent;
-    } while (element);
-    // Position blocklyDiv over blocklyArea.
-    blocklyDiv.style.left = x + 'px';
-    blocklyDiv.style.top = y + 'px';
-    blocklyDiv.style.width = blocklyArea.offsetWidth + 'px';
-    blocklyDiv.style.height = blocklyArea.offsetHeight + 'px';
-    Blockly.svgResize(workspace);
-  };
-  window.addEventListener('resize', onresize, false);
-  onresize();
-  Blockly.svgResize(workspace);
-
-  /*
-    var toolbox = document.getElementById('toolbox');
-    var workspace = Blockly.inject('blocklyDiv',
-        {
-            comments: true,
-            collapse: true,
-            disable: true,
-            grid:
-            {
-                spacing: 25,
-                length: 3,
-                colour: '#ccc',
-                snap: true
-            },
-            toolbox: toolbox,
-            zoom:
-            {
-                controls: true,
-                wheel: true,
-                startScale: 1.0,
-                maxScale: 4,
-                minScale: 0.25,
-                scaleSpeed: 1.1
-            }
-        });
-  */
-
- Blockly.Blocks['on_start'] = {
+  Blockly.Blocks['on_start'] = {
     init: function() {
       this.appendDummyInput()
           .appendField(new Blockly.FieldLabelSerializable("On start"), "NAME");
@@ -294,4 +242,30 @@ document.addEventListener("DOMContentLoaded", function () {
     }
     run()
   })
+
+  var blocklyArea = document.getElementById('blocklyArea');
+  var blocklyDiv = document.getElementById('blocklyDiv');
+  var workspace = Blockly.inject(blocklyDiv,
+      {toolbox: document.getElementById('toolbox')});
+  var onresize = function(e) {
+    // Compute the absolute coordinates and dimensions of blocklyArea.
+    var element = blocklyArea;
+    var x = 0;
+    var y = 0;
+    do {
+      x += element.offsetLeft;
+      y += element.offsetTop;
+      element = element.offsetParent;
+    } while (element);
+    // Position blocklyDiv over blocklyArea.
+    blocklyDiv.style.left = x + 'px';
+    blocklyDiv.style.top = y + 'px';
+    blocklyDiv.style.width = blocklyArea.offsetWidth + 'px';
+    blocklyDiv.style.height = blocklyArea.offsetHeight + 'px';
+    Blockly.svgResize(workspace);
+  };
+  window.addEventListener('resize', onresize, false);
+  onresize();
+  Blockly.svgResize(workspace);
+
 });

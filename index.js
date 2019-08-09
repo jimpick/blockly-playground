@@ -1,4 +1,11 @@
 const ipfsPromise = window.Ipfs.create({
+  config: {
+    Addresses: {
+      Swarm: [
+        '/dns4/rendezvous.jimpick.com/tcp/9093/wss/p2p-websocket-star'
+      ]
+    }
+  },
   EXPERIMENTAL: { pubsub: true }
 })
 
@@ -157,8 +164,8 @@ document.addEventListener("DOMContentLoaded", function () {
       function run (value_name) {
         const lastFunc = context.lastHandler[context.lastHandler.length - 1]
         context.lastHandler[context.lastHandler.length - 1] =
-          async function () {
-            await lastFunc()
+          async function (...args) {
+            await lastFunc(...args)
             const { name, size } = eval(value_name)
             const array = new Uint8Array(size)
             for (let i = 0; i < size; i += 65536) {
@@ -180,8 +187,8 @@ document.addEventListener("DOMContentLoaded", function () {
       function run () {
         const lastFunc = context.lastHandler[context.lastHandler.length - 1]
         context.lastHandler[context.lastHandler.length - 1] =
-          async function () {
-            const { buffer } = await lastFunc()
+          async function (...args) {
+            const { buffer } = await lastFunc(...args)
             console.log('ipfs add', buffer)
             const result = await context.ipfs.add(buffer)
             const cid = result[0].hash
@@ -200,8 +207,8 @@ document.addEventListener("DOMContentLoaded", function () {
       function run (topic) {
         const lastFunc = context.lastHandler[context.lastHandler.length - 1]
         context.lastHandler[context.lastHandler.length - 1] =
-          async function () {
-            const { cid } = await lastFunc()
+          async function (...args) {
+            const { cid } = await lastFunc(...args)
             console.log('write cid to pubsub topic', topic, cid)
             const data = window.Ipfs.Buffer.from(cid)
             await context.ipfs.pubsub.publish(topic, data)
@@ -236,8 +243,19 @@ document.addEventListener("DOMContentLoaded", function () {
   };
 
   Blockly.JavaScript['ipfs_get'] = function(block) {
-      // TODO: Assemble JavaScript into code variable.
-      var code = `// ipfs get <cid>\n\n`
+      function run () {
+        const lastFunc = context.lastHandler[context.lastHandler.length - 1]
+        context.lastHandler[context.lastHandler.length - 1] =
+          async function (...args) {
+            const { cid } = await lastFunc(...args)
+            console.log('ipfs get', cid)
+            const result = await context.ipfs.cat(cid)
+            console.log('Result', result)
+          }
+      }
+      var code = `// ipfs get\n\n` +
+        ';(' + run.toString().replace('run (', '(') + ')' +
+        `()\n\n`
       return code;
   };
 
@@ -307,6 +325,7 @@ document.addEventListener("DOMContentLoaded", function () {
           '      for (const handler of handlers.pubsub[topic]) {\n' +
           '        console.log("installing handler for topic:", topic)\n' +
           '        context.ipfs.pubsub.subscribe(topic, async msg => {\n' +
+          '          console.log("Message:", topic, msg)\n' +
           '          console.log("Before context:", context)\n' +
           '          handler(msg)\n' +
           '          console.log("After context:", context)\n' +

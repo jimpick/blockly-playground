@@ -1,25 +1,4 @@
-/**
- * @license
- * 
- * Copyright 2019 Google LLC
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *   http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-/**
- * @fileoverview Example of including Blockly using the UMD bundle
- * @author samelh@google.com (Sam El-Husseini)
- */
+const ipfsPromise = window.Ipfs.create()
 
 document.addEventListener("DOMContentLoaded", function () {
 
@@ -51,7 +30,8 @@ document.addEventListener("DOMContentLoaded", function () {
     init: function() {
       this.appendDummyInput()
         .appendField(new Blockly.FieldNumber(1, 0), "SIZE")
-        .appendField(new Blockly.FieldDropdown([["bytes","BYTES"], ["kB","KB"], ["kiB","KIB"], ["MB","MB"], ["MiB","MIB"], ["GB","GB"], ["GiB","GIB"]]), "METRIC");
+        .appendField(new Blockly.FieldDropdown([["bytes","BYTES"], ["kB","KB"], ["kiB","KIB"]]), "METRIC");
+        // .appendField(new Blockly.FieldDropdown([["bytes","BYTES"], ["kB","KB"], ["kiB","KIB"], ["MB","MB"], ["MiB","MIB"], ["GB","GB"], ["GiB","GIB"]]), "METRIC");
       this.setOutput(true, "size");
       this.setColour(0);
       this.setTooltip("");
@@ -135,19 +115,55 @@ document.addEventListener("DOMContentLoaded", function () {
     return code;
   };
 
+  Blockly.JavaScript['sizer'] = function(block) {
+    var number_size = block.getFieldValue('SIZE');
+    var dropdown_metric = block.getFieldValue('METRIC');
+    // var code = `${number_size} ${dropdown_metric}`;
+    let multiplier = 1
+    switch (dropdown_metric) {
+      case 'KB':
+        multiplier = 1000
+        break
+      case 'KIB':
+        multiplier = 1024
+        break
+      case 'MB':
+        multiplier = 1000 ^ 2
+        break
+      case 'MIB':
+        multiplier = 1024 ^ 2
+        break
+      case 'GB':
+        multiplier = 1000 ^ 3
+        break
+      case 'GIB':
+        multiplier = 1024 ^ 3
+        break
+    }
+    var code = JSON.stringify({
+      name: `${number_size} ${dropdown_metric}`,
+      size: Number(number_size) * multiplier
+    })
+    return [code, Blockly.JavaScript.ORDER_NONE];
+  };
+
   Blockly.JavaScript['generate_random_blob'] = function(block) {
       var value_name = Blockly.JavaScript.valueToCode(
         block, 'NAME', Blockly.JavaScript.ORDER_ATOMIC
-      ).replace('(', '').replace(')', '')
+      )
+      console.log('Jim1', value_name)
+      console.log('Jim2', eval(value_name))
       function run (value_name) {
         const lastFunc = context.lastHandler[context.lastHandler.length - 1]
         context.lastHandler[context.lastHandler.length - 1] =
           async function () {
             await lastFunc()
-            console.log('Generate random blob:', value_name)
-            return {
-              file: 'blob_' + value_name.replace(/ /g, '_') + '.bin'
-            }
+            const { name, size } = eval(value_name)
+            const array = new Uint8Array(size)
+            window.crypto.getRandomValues(array)
+            const buffer = Buffer.from(array)
+            console.log('Generate random blob:', name)
+            return { buffer }
           }
       }
       var code = `// Generate random blob: ${value_name}\n\n` +
@@ -156,23 +172,17 @@ document.addEventListener("DOMContentLoaded", function () {
       return code;
   };
 
-  Blockly.JavaScript['sizer'] = function(block) {
-    var number_size = block.getFieldValue('SIZE');
-    var dropdown_metric = block.getFieldValue('METRIC');
-    var code = `${number_size} ${dropdown_metric}`;
-    return [code, Blockly.JavaScript.ORDER_NONE];
-  };
-
   Blockly.JavaScript['ipfs_add'] = function(block) {
       function run (value_name) {
         const lastFunc = context.lastHandler[context.lastHandler.length - 1]
         context.lastHandler[context.lastHandler.length - 1] =
           async function () {
-            const { file } = await lastFunc()
-            console.log('ipfs add', file)
-            return {
-              cid: '12345'
-            }
+            const { buffer } = await lastFunc()
+            console.log('ipfs add', buffer)
+            const result = await context.ipfs.add(buffer)
+            const cid = result[0].hash
+            console.log('CID:', cid)
+            return { cid }
           }
       }
       var code = `// ipfs add\n\n` +
@@ -231,9 +241,14 @@ document.addEventListener("DOMContentLoaded", function () {
           code + '\n\n' +
           'console.log("before context", context)\n\n' +
           'for (const handler of handlers.start) {\n' +
-          '  handler().then(() => {\n' +
-          '    console.log("after context", context)\n' +
-          '  })\n' +
+          '  ipfsPromise\n' +
+          '    .then(node => {\n' +
+          '      context.ipfs = node\n' +
+          '    })\n' +
+          '    .then(handler)\n' +
+          '    .then(() => {\n' +
+          '      console.log("after context", context)\n' +
+          '    })\n' +
           '}\n'
         eval(code)
       } catch (e) {

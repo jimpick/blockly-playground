@@ -2,7 +2,7 @@
   "name": "blockly-playground",
   "version": "0.0.0",
   "scripts": {
-    "start": "node_modules/.bin/http-server -c-1 ./ -p 3000"
+    "start": "node_modules/.bin/http-server -c-1 ./ -p 5000"
   },
   "dependencies": {
     "blockly": "^2.20190722.0"

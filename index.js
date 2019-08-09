@@ -1,4 +1,6 @@
-const ipfsPromise = window.Ipfs.create()
+const ipfsPromise = window.Ipfs.create({
+  EXPERIMENTAL: { pubsub: true }
+})
 
 document.addEventListener("DOMContentLoaded", function () {
 
@@ -174,7 +176,7 @@ document.addEventListener("DOMContentLoaded", function () {
   };
 
   Blockly.JavaScript['ipfs_add'] = function(block) {
-      function run (value_name) {
+      function run () {
         const lastFunc = context.lastHandler[context.lastHandler.length - 1]
         context.lastHandler[context.lastHandler.length - 1] =
           async function () {
@@ -193,9 +195,20 @@ document.addEventListener("DOMContentLoaded", function () {
   };
 
   Blockly.JavaScript['write_cid_to_pubsub_topic'] = function(block) {
-      var text_name = block.getFieldValue('NAME');
-      // TODO: Assemble JavaScript into code variable.
-      var code = `// write <cid> to pubsub topic ${text_name}\n\n`
+      var topic = block.getFieldValue('NAME');
+      function run (topic) {
+        const lastFunc = context.lastHandler[context.lastHandler.length - 1]
+        context.lastHandler[context.lastHandler.length - 1] =
+          async function () {
+            const { cid } = await lastFunc()
+            console.log('write cid to pubsub topic', topic, cid)
+            const data = Buffer.from(cid)
+            const result = await context.ipfs.pubsub.publish(topic, data)
+          }
+      }
+      var code = `// write cid to pubsub topic\n\n` +
+        ';(' + run.toString().replace('run (', '(') + ')' +
+        `('${topic}')\n\n`
       return code;
   };
 

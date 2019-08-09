@@ -30,7 +30,7 @@ document.addEventListener("DOMContentLoaded", function () {
     init: function() {
       this.appendDummyInput()
         .appendField(new Blockly.FieldNumber(1, 0), "SIZE")
-        .appendField(new Blockly.FieldDropdown([["bytes","BYTES"], ["kB","KB"], ["kiB","KIB"]]), "METRIC");
+        .appendField(new Blockly.FieldDropdown([["bytes","BYTES"], ["kB","KB"], ["kiB","KIB"], ["MB","MB"], ["MiB","MIB"]]), "METRIC");
         // .appendField(new Blockly.FieldDropdown([["bytes","BYTES"], ["kB","KB"], ["kiB","KIB"], ["MB","MB"], ["MiB","MIB"], ["GB","GB"], ["GiB","GIB"]]), "METRIC");
       this.setOutput(true, "size");
       this.setColour(0);
@@ -128,16 +128,16 @@ document.addEventListener("DOMContentLoaded", function () {
         multiplier = 1024
         break
       case 'MB':
-        multiplier = 1000 ^ 2
+        multiplier = Math.pow(1000, 2)
         break
       case 'MIB':
-        multiplier = 1024 ^ 2
+        multiplier = Math.pow(1024, 2)
         break
       case 'GB':
-        multiplier = 1000 ^ 3
+        multiplier = Math.pow(1000, 3)
         break
       case 'GIB':
-        multiplier = 1024 ^ 3
+        multiplier = Math.pow(1024, 3)
         break
     }
     var code = JSON.stringify({
@@ -151,8 +151,6 @@ document.addEventListener("DOMContentLoaded", function () {
       var value_name = Blockly.JavaScript.valueToCode(
         block, 'NAME', Blockly.JavaScript.ORDER_ATOMIC
       )
-      console.log('Jim1', value_name)
-      console.log('Jim2', eval(value_name))
       function run (value_name) {
         const lastFunc = context.lastHandler[context.lastHandler.length - 1]
         context.lastHandler[context.lastHandler.length - 1] =
@@ -160,8 +158,11 @@ document.addEventListener("DOMContentLoaded", function () {
             await lastFunc()
             const { name, size } = eval(value_name)
             const array = new Uint8Array(size)
-            window.crypto.getRandomValues(array)
-            const buffer = Buffer.from(array)
+            for (let i = 0; i < size; i += 65536) {
+              const subarray = array.subarray(i, Math.min(65536, size - i))
+              window.crypto.getRandomValues(subarray)
+            }
+            const buffer = window.Ipfs.Buffer.from(array)
             console.log('Generate random blob:', name)
             return { buffer }
           }
@@ -250,6 +251,7 @@ document.addEventListener("DOMContentLoaded", function () {
           '      console.log("after context", context)\n' +
           '    })\n' +
           '}\n'
+        // console.log('code', code)
         eval(code)
       } catch (e) {
         console.error(e)

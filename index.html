@@ -36,20 +36,22 @@
         <category name="Blocks" expanded="true">
             <block type="on_start">
                 <field name="NAME">On start</field>
-            </block>
-            <block type="generate_random_blob">
-                <field name="GEN RANDOM BLOB">Generate random blob</field>
-                <value name="NAME">
-                    <block type="sizer">
-                        <field name="SIZE">10</field>
-                        <field name="METRIC">KB</field>
-                    </block>
-                </value>
                 <next>
-                    <block type="ipfs_add">
+                    <block type="generate_random_blob">
+                        <field name="GEN RANDOM BLOB">Generate random blob</field>
+                        <value name="NAME">
+                            <block type="sizer">
+                                <field name="SIZE">10</field>
+                                <field name="METRIC">KB</field>
+                            </block>
+                        </value>
                         <next>
-                            <block type="write_cid_to_pubsub_topic">
-                                <field name="NAME">blockly_demo</field>
+                            <block type="ipfs_add">
+                                <next>
+                                    <block type="write_cid_to_pubsub_topic">
+                                        <field name="NAME">blockly_demo</field>
+                                    </block>
+                                </next>
                             </block>
                         </next>
                     </block>

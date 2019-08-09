@@ -59,6 +59,7 @@ document.addEventListener("DOMContentLoaded", function () {
           .appendField("Write CID to pubsub topic")
           .appendField(new Blockly.FieldTextInput("name"), "NAME");
       this.setPreviousStatement(true, null);
+      this.setNextStatement(true, null);
       this.setColour(230);
    this.setTooltip("");
    this.setHelpUrl("");
@@ -202,8 +203,8 @@ document.addEventListener("DOMContentLoaded", function () {
           async function () {
             const { cid } = await lastFunc()
             console.log('write cid to pubsub topic', topic, cid)
-            const data = Buffer.from(cid)
-            const result = await context.ipfs.pubsub.publish(topic, data)
+            const data = window.Ipfs.Buffer.from(cid)
+            await context.ipfs.pubsub.publish(topic, data)
           }
       }
       var code = `// write cid to pubsub topic\n\n` +
@@ -213,10 +214,25 @@ document.addEventListener("DOMContentLoaded", function () {
   };
 
   Blockly.JavaScript['read_cid_from_pubsub_topic'] = function(block) {
-      var text_name = block.getFieldValue('NAME');
-      // TODO: Assemble JavaScript into code variable.
-      var code = `// read <cid> from pubsub topic ${text_name}\n\n`
-      return code;
+    var topic = block.getFieldValue('NAME');
+    function run (topic) {
+      if (!handlers.pubsub) handlers.pubsub = {}
+      if (!handlers.pubsub[topic]) handlers.pubsub[topic] = []
+      {
+        const func = async function (msg) {
+          console.log("received pubsub message on topic", topic, msg)
+          const cid = msg.data.toString()
+          console.log("cid:", cid)
+          return { cid }
+        }
+        handlers.pubsub[topic].push(func)
+      }
+      context.lastHandler = handlers.pubsub[topic]
+    }
+    var code = `// read <cid> from pubsub topic ${topic}\n\n` +
+      ';(' + run.toString().replace('run (', '(') + ')' +
+      `('${topic}')\n\n`
+    return code;
   };
 
   Blockly.JavaScript['ipfs_get'] = function(block) {
@@ -265,6 +281,41 @@ document.addEventListener("DOMContentLoaded", function () {
           '    })\n' +
           '}\n'
         // console.log('code', code)
+        eval(code)
+      } catch (e) {
+        console.error(e)
+      }
+    }
+    run()
+  })
+
+  installBtn = document.getElementById('installBtn')
+  installBtn.addEventListener('click', () => {
+    Blockly.JavaScript.addReservedWords('code');
+    var code = Blockly.JavaScript.workspaceToCode(workspace);
+    console.log('Install handlers', code)
+    // FIXME: Uninstall
+    async function run () {
+      try {
+        code =
+          'ipfsPromise.then(node => {\n' +
+          '  let context = { ipfs: node }\n' +
+          '  let handlers = {}\n\n' +
+          code + '\n\n' +
+          '  if (handlers.pubsub) {\n' +
+          '    for (const topic of Object.keys(handlers.pubsub)) {\n' +
+          '      for (const handler of handlers.pubsub[topic]) {\n' +
+          '        console.log("installing handler for topic:", topic)\n' +
+          '        context.ipfs.pubsub.subscribe(topic, async msg => {\n' +
+          '          console.log("Before context:", context)\n' +
+          '          handler(msg)\n' +
+          '          console.log("After context:", context)\n' +
+          '        })\n' +
+          '      }\n' +
+          '    }\n' +
+          '  }\n' +
+          '})'
+        console.log('code', code)
         eval(code)
       } catch (e) {
         console.error(e)

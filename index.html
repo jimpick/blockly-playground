@@ -7,8 +7,8 @@
             display: flex;
         }
         #blocklyArea {
-            width: 50vw;
-            height: 70vh;
+            width: 80vw;
+            height: 95vh;
         }
     </style>
 </head>
@@ -33,7 +33,8 @@
     <script type='text/javascript' src='./index.js'></script>
 
     <xml xmlns="https://developers.google.com/blockly/xml" id="toolbox" style="display: none">
-        <category name="Blocks" expanded="true">
+        <!-- <category name="Blocks" expanded="true"> -->
+        <category name="Blocks" expanded="false">
             <block type="on_start">
                 <field name="NAME">On start</field>
                 <next>
@@ -60,7 +61,7 @@
             <block type="read_cid_from_pubsub_topic">
                 <field name="NAME">blockly_demo</field>
                 <next>
-                    <block type="ipfs_get">
+                    <block type="ipfs_cat">
                         <next>
                             <block type="wait_for_completion"/>
                         </next>

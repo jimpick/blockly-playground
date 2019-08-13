@@ -2,7 +2,8 @@ const ipfsPromise = window.Ipfs.create({
   config: {
     Addresses: {
       Swarm: [
-        '/dns4/rendezvous.jimpick.com/tcp/9093/wss/p2p-websocket-star'
+        // '/dns4/rendezvous.jimpick.com/tcp/9093/wss/p2p-websocket-star'
+        '/ip4/35.233.137.223/tcp/32029/ws/p2p-websocket-star'
       ]
     }
   },
@@ -85,10 +86,10 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   };
   
-  Blockly.Blocks['ipfs_get'] = {
+  Blockly.Blocks['ipfs_cat'] = {
     init: function() {
       this.appendDummyInput()
-          .appendField("ipfs get");
+          .appendField("ipfs cat");
       this.setPreviousStatement(true, null);
       this.setNextStatement(true, null);
       this.setColour(230);
@@ -242,13 +243,13 @@ document.addEventListener("DOMContentLoaded", function () {
     return code;
   };
 
-  Blockly.JavaScript['ipfs_get'] = function(block) {
+  Blockly.JavaScript['ipfs_cat'] = function(block) {
       function run () {
         const lastFunc = context.lastHandler[context.lastHandler.length - 1]
         context.lastHandler[context.lastHandler.length - 1] =
           async function (...args) {
             const { cid } = await lastFunc(...args)
-            console.log('ipfs get', cid)
+            console.log('ipfs cat', cid)
             const result = await context.ipfs.cat(cid)
             console.log('Result', result)
           }
